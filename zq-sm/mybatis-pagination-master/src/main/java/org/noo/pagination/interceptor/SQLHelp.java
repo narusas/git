@@ -95,7 +95,7 @@ public class SQLHelp {
     public static int getCount(final String sql, final Connection connection,
                                final MappedStatement mappedStatement, final Object parameterObject,
                                final BoundSql boundSql) throws SQLException {
-        final String countSql = "select count(1) from (" + sql + ") as tmp_count";
+        final String countSql = "select count(1) from (" + sql + ") for_count";
         PreparedStatement countStmt = null;
         ResultSet rs = null;
         try {
@@ -131,7 +131,7 @@ public class SQLHelp {
     public static String generatePageSql(String sql, Page page, Dialect dialect) {
         if (dialect.supportsLimit()) {
             int pageSize = page.getPageSize();
-            int index = (page.getCurrentPage() - 1) * pageSize;
+            int index = (page.getCurrentPage() ) * pageSize;
             int start = index < 0 ? 0 : index;
             return dialect.getLimitString(sql, start, pageSize);
         } else {

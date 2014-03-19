@@ -58,20 +58,28 @@ public class PreparePaginationInterceptor extends BaseInterceptor {
                     log.error("参数未实例化");
                     throw new NullPointerException("parameterObject尚未实例化！");
                 } else {
-                    final Connection connection = (Connection) ivk.getArgs()[0];
-                    final String sql = boundSql.getSql();
-                    //记录统计
-                    final int count = SQLHelp.getCount(sql, connection,
-                            mappedStatement, parameterObject, boundSql);
-                    Page page = null;
-                    page = convertParameter(parameterObject, page);
-                    page.init(count, page.getPageSize(), page.getCurrentPage());
-                    String pagingSql = SQLHelp.generatePageSql(sql, page, DIALECT);
-                    if (log.isDebugEnabled()) {
-                        log.debug("分页SQL:" + pagingSql);
-                    }
-                    //将分页sql语句反射回BoundSql.
-                    Reflections.setFieldValue(boundSql, "sql", pagingSql);
+                	Connection connection = null;
+                	try {
+	                    connection = (Connection) ivk.getArgs()[0];
+	                    final String sql = boundSql.getSql();
+	                    //记录统计
+	                    final int count = SQLHelp.getCount(sql, connection,
+	                            mappedStatement, parameterObject, boundSql);
+	                    Page page = null;
+	                    page = convertParameter(parameterObject, page);
+	                    page.init(count, page.getPageSize(), page.getCurrentPage());
+	                    String pagingSql = SQLHelp.generatePageSql(sql, page, DIALECT);
+	                    if (log.isDebugEnabled()) {
+	                        log.debug("分页SQL:" + pagingSql);
+	                    }
+	                    //将分页sql语句反射回BoundSql.
+	                    Reflections.setFieldValue(boundSql, "sql", pagingSql);
+                	}
+                	finally {
+                		if (connection != null){
+                			connection.close();
+                		}
+                	}
                 }
             }
         }

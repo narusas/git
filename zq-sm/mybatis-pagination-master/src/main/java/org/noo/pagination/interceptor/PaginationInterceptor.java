@@ -45,12 +45,13 @@ public class PaginationInterceptor extends BaseInterceptor {
 
             //分页参数--上下文传参
             Page page = null;
-            PageContext context = PageContext.getPageContext();
-
+            
             //map传参每次都将currentPage重置,先判读map再判断context
-            if (parameterObject != null && context == null) {
+            if (parameterObject != null ) {
                 page = convertParameter(parameterObject, page);
             }
+
+            PageContext context = PageContext.getPageContext();
 
 
             //分页参数--context参数里的Page传参
@@ -62,8 +63,15 @@ public class PaginationInterceptor extends BaseInterceptor {
                 int totPage = page.getTotalRows();
                 //得到总记录数
                 if (totPage == 0) {
-                    Connection connection = mappedStatement.getConfiguration().getEnvironment().getDataSource().getConnection();
-                    totPage = SQLHelp.getCount(originalSql, connection, mappedStatement, parameterObject, boundSql);
+                    Connection connection = null;
+					try {
+						connection = mappedStatement.getConfiguration().getEnvironment().getDataSource().getConnection();
+						totPage = SQLHelp.getCount(originalSql, connection, mappedStatement, parameterObject, boundSql);
+					} finally {
+						if (connection != null){
+							connection.close();
+						}
+					}
                 }
 
                 //分页计算
